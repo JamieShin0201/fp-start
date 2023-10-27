@@ -1,6 +1,20 @@
 package utils
 
 
+// 코드를 값으로 다루어 표현력 높이기
+// go, pipe
+fun go(vararg args: (Int) -> Int) =
+    curriedReduce({ acc, f: (Int) -> Int -> f(acc) }, 0)(args.toList())
+
+fun pipe(vararg args: (Int) -> Int): (Int) -> Int {
+    val first = args[0]
+    val rest = args.slice(1 until args.size)
+
+    return { element ->
+        first(element) + go(*rest.toTypedArray())
+    }
+}
+
 fun <T, R> curriedMap(transform: (T) -> R) =
     { iterable: Iterable<T> ->
         val newList = mutableListOf<R>()
