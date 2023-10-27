@@ -1,43 +1,7 @@
 package chapter04
 
-data class Product(
-    val name: String,
-    val price: Int
-)
+import utils.*
 
-val products = listOf(
-    Product(name = "반팔티", price = 15000),
-    Product(name = "긴팔티", price = 20000),
-    Product(name = "핸드폰케이스", price = 15000),
-    Product(name = "후드티", price = 30000),
-    Product(name = "바지", price = 25000)
-)
-
-fun <T, R> map(transform: (T) -> R, iterable: Iterable<T>): Iterable<R> {
-    val newList = mutableListOf<R>()
-    for (element in iterable) {
-        newList.add(transform(element))
-    }
-
-    return newList
-}
-
-fun <T> filter(predicate: (T) -> Boolean, iterable: Iterable<T>): Iterable<T> {
-    val newList = mutableListOf<T>()
-    for (element in iterable) {
-        if (predicate(element)) newList.add(element)
-    }
-
-    return newList
-}
-
-fun <T, R> reduce(accumulate: (R, T) -> R, init: R, iterable: Iterable<T>): R {
-    var acc = init
-    for (element in iterable) {
-        acc = accumulate(acc, element)
-    }
-    return acc
-}
 
 val iterable = Iterable {
     iterator {
