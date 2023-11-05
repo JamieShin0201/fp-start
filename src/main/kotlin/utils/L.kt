@@ -44,5 +44,39 @@ class L {
                 }
             }
         }
+
+        fun <T> flatten(iterable: Iterable<T>) =
+            Iterable {
+                val iterator = iterable.iterator()
+                iterator {
+                    while (iterator.hasNext()) {
+                        val element = iterator.next()
+                        if (element is Iterable<*>) {
+                            for (e in element) yield(e)
+                        } else yield(element)
+                    }
+                }
+            }
+
+        fun <T> deepFlat(iterable: Iterable<T>): Iterable<T> {
+            return Iterable {
+                val iterator = iterable.iterator()
+                iterator {
+                    while (iterator.hasNext()) {
+                        val element = iterator.next()
+                        if (element is Iterable<*>) {
+                            val iterable = deepFlat(element)
+                            for (e in iterable) yield(e as T)
+                        } else yield(element)
+                    }
+                }
+            }
+        }
+
+        fun <T, R> flatMap(transform: (T) -> R) = { iterable: Iterable<T> ->
+            map(transform)(
+                deepFlat(iterable)
+            )
+        }
     }
 }
