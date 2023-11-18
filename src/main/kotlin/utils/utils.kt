@@ -1,5 +1,7 @@
 package utils
 
+import java.util.concurrent.CompletableFuture
+
 
 // 코드를 값으로 다루어 표현력 높이기
 // go, pipe
@@ -83,3 +85,46 @@ fun <T, R> reduce(accumulate: (R, T) -> R, init: R, iterable: Iterable<T>): R {
     }
     return acc
 }
+
+fun <T> curriedTake2(l: Int) = { iterable: Iterable<T> ->
+    val newList = mutableListOf<T>()
+    for ((i, element) in iterable.withIndex()) {
+        if (i == l) {
+            break
+        }
+
+        if (element is CompletableFuture<*>) {
+            try {
+                println(element)
+                newList.add(element.get() as T)
+            } catch (e: Exception) {
+                if (e.cause is NopException) println("pass NopException")
+                else throw e
+            }
+        }
+    }
+
+    newList
+}
+
+fun <T, R> curriedReduce2(accumulate: (R, T) -> R, init: R) =
+    { iterable: Iterable<T> ->
+        var acc = init
+        for (element in iterable) {
+            acc = if (element is CompletableFuture<*>) {
+                try {
+                    accumulate(acc, element.get() as T)
+                } catch (e: Exception) {
+                    if (e.cause is NopException) acc
+                    else throw e
+                }
+            } else {
+                accumulate(acc, element)
+            }
+
+        }
+        acc
+    }
+
+
+class NopException : RuntimeException()
