@@ -1,5 +1,11 @@
 package utils
 
+import java.util.concurrent.CompletableFuture
+
+fun go1(a: Any, f: ((Any) -> Any)) = when (a) {
+    is CompletableFuture<*> -> a.thenApply(f).join() // TODO: 여기서 join 해야하나?..
+    else -> f(a)
+}
 
 class L {
 
@@ -22,6 +28,19 @@ class L {
             }
         }
 
+        fun <T, R> map2(transform: (T) -> R) = { iterable: Iterable<T> ->
+            Iterable {
+                val iterator = iterable.iterator()
+                iterator {
+                    while (iterator.hasNext()) {
+                        yield(
+                            go1(iterator.next() as Any, transform as ((Any) -> Any))
+                        )
+                    }
+                }
+            }
+        }
+
         fun <T> filter(predicate: (T) -> Boolean) = { iterable: Iterable<T> ->
             Iterable {
                 val iterator = iterable.iterator()
@@ -29,6 +48,22 @@ class L {
                     while (iterator.hasNext()) {
                         val element = iterator.next()
                         if (predicate(element)) yield(element)
+                    }
+                }
+            }
+        }
+
+        fun <T> filter2(predicate: (T) -> Boolean) = { iterable: Iterable<T> ->
+            Iterable {
+                val iterator = iterable.iterator()
+                iterator {
+                    while (iterator.hasNext()) {
+                        val element = iterator.next() as Any
+                        val result = go1(element, predicate as ((Any) -> Any))
+                        if (result as Boolean) {
+                            if (element is CompletableFuture<*>) yield(element.join())
+                            else yield(element)
+                        }
                     }
                 }
             }
