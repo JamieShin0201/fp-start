@@ -15,6 +15,18 @@ fun pipe(vararg args: (Int) -> Int): (Int) -> Int {
     }
 }
 
+fun <T> curriedTake(l: Int) = { iterable: Iterable<T> ->
+    val newList = mutableListOf<T>()
+    for ((i, element) in iterable.withIndex()) {
+        if (i == l) {
+            break
+        }
+        newList.add(element)
+    }
+
+    newList
+}
+
 fun <T, R> curriedMap(transform: (T) -> R) =
     { iterable: Iterable<T> ->
         val newList = mutableListOf<R>()
